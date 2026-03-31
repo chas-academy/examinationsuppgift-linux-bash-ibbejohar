@@ -8,8 +8,15 @@ check_root(){
     fi
 }
 
+check_input(){
+    if [[ -z $1 ]]; then
+        echo "Minst en användare måste ge"
+        exit 1
+    fi
+}
+
 # Skapar skeletstruktur för undermappar
-create_dir(){
+create_temp_dir(){
     mkdir -p skel/Documents
     mkdir -p skel/Downloads
     mkdir -p skel/Work
@@ -25,7 +32,7 @@ cleanup(){
 create_user(){
     for user in "$@"
     do
-        useradd -m "$user" -k skel
+        useradd -m "$user" -k skel && echo "Användare $user skapad"
     done
 }
 
@@ -34,7 +41,7 @@ create_welcome_file(){
     for user in "$@"
     do
         # Välkommen meddelande
-        sudo -u "$user" sh -c 'echo "Välkommen $USER" > "$HOME/welcome.txt"'
+        sudo -u "$user" sh -c 'echo "Välkommen $USER" > "$HOME/welcome.txt"' && echo "$user välkommen meddelande skapad"
         # Filtera endast riktiga användare och lägg till i welcome filen
         sudo -u "$user" sh -c "awk -F: '\$3 >= 1000 && \$3 <= 9999 {print \$1}' /etc/passwd >> \$HOME/welcome.txt"
         chmod -R 700 "/home/$user"
@@ -43,7 +50,8 @@ create_welcome_file(){
 
 main(){
 check_root
-create_dir
+check_input "$1"
+create_temp_dir
 create_user "$@"
 create_welcome_file "$@"
 cleanup
