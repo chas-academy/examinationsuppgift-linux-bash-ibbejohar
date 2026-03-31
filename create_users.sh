@@ -8,6 +8,7 @@ check_root(){
     fi
 }
 
+# Kollar om en minst argument finns
 check_input(){
     if [[ -z $1 ]]; then
         echo "Minst en användare måste ge"
@@ -36,13 +37,13 @@ create_user(){
     done
 }
 
-# Skapar välkommen fil med användares name och befintliga anvädare
+# Skapar välkommen fil med användarens name och befintliga användare
 create_welcome_file(){
     for user in "$@"
     do
         # Välkommen meddelande
         sudo -u "$user" sh -c 'echo "Välkommen $USER" > "$HOME/welcome.txt"' && echo "$user välkommen meddelande skapad"
-        # Filtera endast riktiga användare och lägg till i welcome filen
+        # Filtrera endast riktiga användare och lägg till i welcome filen
         sudo -u "$user" sh -c "awk -F: '\$3 >= 1000 && \$3 <= 9999 {print \$1}' /etc/passwd >> \$HOME/welcome.txt"
         chmod -R 700 "/home/$user"
     done
@@ -56,6 +57,5 @@ create_user "$@"
 create_welcome_file "$@"
 cleanup
 }
-
 
 main "$@"
